@@ -21,7 +21,7 @@ Type the following to get usage information:
 onetime -h
 ```
 
-To expert using onetime see [the tutorial on our wiki](https://github.com/mvalipour/onetime-cli/wiki/Tutorial)
+To expert using onetime see [the tutorial on our wiki](https://github.com/NewOrbit/onetime-cli/wiki/Tutorial)
 
 ## Features
 
