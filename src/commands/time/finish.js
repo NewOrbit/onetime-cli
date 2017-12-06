@@ -39,10 +39,10 @@ function controller(t) {
         getResourceType.then(function (result) {
           tp.getIssueTimeTo(result.Project.Id).then(function(value) {
             console.log(result.Project.Id);
-            var getIssueTimeToValue = value.items[0].issueCFRaw;
+            var issueTimeToValue = value.items[0].issueCFRaw;
 
             // configured to not log bug-time at all
-            if(isBug && getIssueTimeToValue === 'none') {
+            if(isBug && issueTimeToValue === 'none') {
               utils.log.chalk('red', '    System is configured NOT to log bug times AT ALL.');
               return done();
             }
@@ -50,13 +50,13 @@ function controller(t) {
             var getter;
             if (isBug) {
                 getter = tp.getBug;
-                utils.log('    Bugs are configured to be logged against: ' + getIssueTimeToValue);
+                utils.log('    Bugs are configured to be logged against: ' + issueTimeToValue);
             } else if (isTask) {
                 getter = tp.getTask;
-                utils.log('    Bugs are configured to be logged against: ' + getIssueTimeToValue);
+                utils.log('    Bugs are configured to be logged against: ' + issueTimeToValue);
             } else {
                 getter = tp.getStory;
-                utils.log('    Bugs are configured to be logged against: ' + getIssueTimeToValue);
+                utils.log('    Bugs are configured to be logged against: ' + issueTimeToValue);
             }
 
             getter.call(tp, e.tp_task ? e.tp_task.id : e.tp_user_story.id)
@@ -121,10 +121,10 @@ function controller(t) {
                       return logTime_task(done);
                     }
                     else if (isBug) {
-                      if(getIssueTimeToValue === 'Issue') {
+                      if(issueTimeToValue === 'Issue') {
                         return logTime_task(done);
                       }
-                      else if(getIssueTimeToValue === 'User story') {
+                      else if(issueTimeToValue === 'User story') {
                         return logTime_us(done);
                       }
                       else {
