@@ -24,16 +24,25 @@ function controller(t) {
 
         var isBug = e.tp_task && e.tp_task.type === 'bug';
         var isTask = !isBug && e.tp_task;
+        var getResourceType;
 
         utils.log('    Logging time on target process...');
-        tp.getBug(e.tp_task.id).then(function (result) {
-          tp.bugTimeBehavior = tp.getCustomField(result.Project.Id).then(function(value) {
-            if(isBug) {
-                utils.log('    Bugs are configured to be logged against: ' + value.items[0].issueCFRaw);
-            }
+
+        if(isBug) {
+          getResourceType = tp.getBug(e.tp_task.id);
+        } else if(isTask) {
+          getResourceType = tp.getTask(e.tp_task.id);
+        } else if(isUserStory) {
+          getResourceType = tp.getStory(e.tp_user_story);
+        }
+
+        getResourceType.then(function (result) {
+          tp.getIssueTimeTo(result.Project.Id).then(function(value) {
+            console.log(result.Project.Id);
+            var getIssueTimeToValue = value.items[0].issueCFRaw;
 
             // configured to not log bug-time at all
-            if(isBug && value.items[0].issueCFRaw === 'none') {
+            if(isBug && getIssueTimeToValue === 'none') {
               utils.log.chalk('red', '    System is configured NOT to log bug times AT ALL.');
               return done();
             }
@@ -41,91 +50,95 @@ function controller(t) {
             var getter;
             if (isBug) {
                 getter = tp.getBug;
+                utils.log('    Bugs are configured to be logged against: ' + getIssueTimeToValue);
             } else if (isTask) {
                 getter = tp.getTask;
+                utils.log('    Bugs are configured to be logged against: ' + getIssueTimeToValue);
             } else {
                 getter = tp.getStory;
+                utils.log('    Bugs are configured to be logged against: ' + getIssueTimeToValue);
             }
-          getter.call(tp, e.tp_task ? e.tp_task.id : e.tp_user_story.id)
-          .then(function (tpTask) {
-              base.captureTimeRemaining(e.hours, tpTask, function (remain) {
 
-                  var tpdata = {
-                      description: e.notes || '-',
-                      spent: e.hours,
-                      remain: remain,
-                      date: new Date(e.created_at).toJSON()
-                  };
+            getter.call(tp, e.tp_task ? e.tp_task.id : e.tp_user_story.id)
+            .then(function (tpTask) {
+                base.captureTimeRemaining(e.hours, tpTask, function (remain) {
 
-                  function logTime_us(cb) {
-                    // bugs may be without user-story
-                    var isUserStory = tpTask.ResourceType === 'UserStory';
-                    if(!isUserStory && !tpTask.UserStory) {
-                      utils.log.chalk('red', '    This '+tpTask.ResourceType+' is not associated with a user-story. -- ignored');
-                      return cb();
-                    }
+                    var tpdata = {
+                        description: e.notes || '-',
+                        spent: e.hours,
+                        remain: remain,
+                        date: new Date(e.created_at).toJSON()
+                    };
 
-                    var userStoryId = isUserStory ? tpTask.Id : tpTask.UserStory.Id;
+                    function logTime_us(cb) {
+                      // bugs may be without user-story
+                      var isUserStory = tpTask.ResourceType === 'UserStory';
+                      if(!isUserStory && !tpTask.UserStory) {
+                        utils.log.chalk('red', '    This '+tpTask.ResourceType+' is not associated with a user-story. -- ignored');
+                        return cb();
+                      }
 
-                    var tpusdata;
-                    if (isUserStory) {
-                      utils.log('    Logging time on the user story...');
-                      tpusdata = {
-                          description: 'time spent on user story #' + userStoryId,
-                          spent: e.hours,
-                          date: new Date(e.created_at).toJSON()
-                      };
-                    } else {
-                      utils.log('    Logging bug time on the user story...');
-                      tpusdata = {
-                          description: 'time spent on bug #' + e.tp_task.id,
-                          spent: e.hours,
-                          date: new Date(e.created_at).toJSON()
-                      };
-                    }
+                      var userStoryId = isUserStory ? tpTask.Id : tpTask.UserStory.Id;
 
-                    tp.addTime(userStoryId, tpusdata)
-                    .then(function () {
-                        utils.log('    ' + tpdata.spent + 'h is logged on target process against user story #' + userStoryId);
-                        cb();
-                    }, function (err) {
-                        utils.log.err(err);
-                    });
-                  }
+                      var tpusdata;
+                      if (isUserStory) {
+                        utils.log('    Logging time on the user story...');
+                        tpusdata = {
+                            description: 'time spent on user story #' + userStoryId,
+                            spent: e.hours,
+                            date: new Date(e.created_at).toJSON()
+                        };
+                      } else {
+                        utils.log('    Logging bug time on the user story...');
+                        tpusdata = {
+                            description: 'time spent on bug #' + e.tp_task.id,
+                            spent: e.hours,
+                            date: new Date(e.created_at).toJSON()
+                        };
+                      }
 
-                  function logTime_task(cb) {
-                    tp.addTime(e.tp_task.id, tpdata)
-                    .then(function () {
-                        utils.log('    ' + tpdata.spent + 'h is logged on target process against '+ e.tp_task.type +' #' + e.tp_task.id);
-                        cb();
-                    }, function (err) {
-                        utils.log.err(err);
-                    });
-                  }
-
-                  // if not bug, time is always on task
-                  if(isTask) {
-                    return logTime_task(done);
-                  }
-                  else if (isBug) {
-                    if(value.items[0].issueCFRaw === 'Issue') {
-                      return logTime_task(done);
-                    }
-                    else if(value.items[0].issueCFRaw === 'User story') {
-                      return logTime_us(done);
-                    }
-                    else {
-                      // both
-                      return logTime_task(function () {
-                        return logTime_us(done);
+                      tp.addTime(userStoryId, tpusdata)
+                      .then(function () {
+                          utils.log('    ' + tpdata.spent + 'h is logged on target process against user story #' + userStoryId);
+                          cb();
+                      }, function (err) {
+                          utils.log.err(err);
                       });
                     }
-                  } else {
-                      return logTime_us(done);
-                  }
+
+                    function logTime_task(cb) {
+                      tp.addTime(e.tp_task.id, tpdata)
+                      .then(function () {
+                          utils.log('    ' + tpdata.spent + 'h is logged on target process against '+ e.tp_task.type +' #' + e.tp_task.id);
+                          cb();
+                      }, function (err) {
+                          utils.log.err(err);
+                      });
+                    }
+
+                    // if not bug, time is always on task
+                    if(isTask) {
+                      return logTime_task(done);
+                    }
+                    else if (isBug) {
+                      if(getIssueTimeToValue === 'Issue') {
+                        return logTime_task(done);
+                      }
+                      else if(getIssueTimeToValue === 'User story') {
+                        return logTime_us(done);
+                      }
+                      else {
+                        // both
+                        return logTime_task(function () {
+                          return logTime_us(done);
+                        });
+                      }
+                    } else {
+                        return logTime_us(done);
+                    }
+                });
               });
             });
-        });
         }, function (err) {
             utils.log.err('An error occured while fetching task from target process.' + err);
         });

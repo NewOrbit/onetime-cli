@@ -17,7 +17,6 @@ var TargetProcess = (function() {
       }
     };
 
-    this.bugTimeBehavior = this.getCustomField();
     this.allowLoggingTimeToUserStories = opts['story-time'] === 'true';
   }
 
@@ -108,7 +107,7 @@ var TargetProcess = (function() {
     return request(ajax_opts);
   };
 
-  TargetProcess.prototype.getCustomField = function(id, ajax_opts) {
+  TargetProcess.prototype.getIssueTimeTo = function(id, ajax_opts) {
     var url = this.full_url_cf + '/Project/' + id + '?select={id, issueCFRaw:CustomValues["IssueTime to"]}';
     ajax_opts = this.build_ajax_options(url, ajax_opts);
     return request(ajax_opts);
