@@ -24,19 +24,19 @@ function controller(t) {
 
         var isBug = e.tp_task && e.tp_task.type === 'bug';
         var isTask = !isBug && e.tp_task;
-        var getResourceType;
+        var getResource;
 
         utils.log('    Logging time on target process...');
 
         if(isBug) {
-          getResourceType = tp.getBug(e.tp_task.id);
+          getResource = tp.getBug(e.tp_task.id);
         } else if(isTask) {
-          getResourceType = tp.getTask(e.tp_task.id);
+          getResource = tp.getTask(e.tp_task.id);
         } else if(isUserStory) {
-          getResourceType = tp.getStory(e.tp_user_story);
+          getResource = tp.getStory(e.tp_user_story);
         }
 
-        getResourceType.then(function (result) {
+        getResource.then(function (result) {
           tp.getIssueTimeTo(result.Project.Id).then(function(value) {
             console.log(result.Project.Id);
             var issueTimeToValue = value.items[0].issueCFRaw;
