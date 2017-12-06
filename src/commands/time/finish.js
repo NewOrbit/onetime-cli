@@ -26,102 +26,106 @@ function controller(t) {
         var isTask = !isBug && e.tp_task;
 
         utils.log('    Logging time on target process...');
-        if(isBug) {
-          utils.log('    Bugs are configured to be logged against: ' + tp.bugTimeBehavior);
-        }
+        tp.getBug(e.tp_task.id).then(function (result) {
+          tp.bugTimeBehavior = tp.getCustomField(result.Project.Id).then(function(value) {
+            if(isBug) {
+                utils.log('    Bugs are configured to be logged against: ' + value.items[0].issueCFRaw);
+            }
 
-        // configured to not log bug-time at all
-        if(isBug && tp.bugTimeBehavior === 'none') {
-          utils.log.chalk('red', '    System is configured NOT to log bug times AT ALL.');
-          return done();
-        }
+            // configured to not log bug-time at all
+            if(isBug && value.items[0].issueCFRaw === 'none') {
+              utils.log.chalk('red', '    System is configured NOT to log bug times AT ALL.');
+              return done();
+            }
 
-        var getter;
-        if (isBug) {
-            getter = tp.getBug;
-        } else if (isTask) {
-            getter = tp.getTask;
-        } else {
-            getter = tp.getStory;
-        }
-        getter.call(tp, e.tp_task ? e.tp_task.id : e.tp_user_story.id)
-        .then(function (tpTask) {
-            base.captureTimeRemaining(e.hours, tpTask, function (remain) {
+            var getter;
+            if (isBug) {
+                getter = tp.getBug;
+            } else if (isTask) {
+                getter = tp.getTask;
+            } else {
+                getter = tp.getStory;
+            }
+          getter.call(tp, e.tp_task ? e.tp_task.id : e.tp_user_story.id)
+          .then(function (tpTask) {
+              base.captureTimeRemaining(e.hours, tpTask, function (remain) {
 
-                var tpdata = {
-                    description: e.notes || '-',
-                    spent: e.hours,
-                    remain: remain,
-                    date: new Date(e.created_at).toJSON()
-                };
+                  var tpdata = {
+                      description: e.notes || '-',
+                      spent: e.hours,
+                      remain: remain,
+                      date: new Date(e.created_at).toJSON()
+                  };
 
-                function logTime_us(cb) {
-                  // bugs may be without user-story
-                  var isUserStory = tpTask.ResourceType === 'UserStory';
-                  if(!isUserStory && !tpTask.UserStory) {
-                    utils.log.chalk('red', '    This '+tpTask.ResourceType+' is not associated with a user-story. -- ignored');
-                    return cb();
-                  }
+                  function logTime_us(cb) {
+                    // bugs may be without user-story
+                    var isUserStory = tpTask.ResourceType === 'UserStory';
+                    if(!isUserStory && !tpTask.UserStory) {
+                      utils.log.chalk('red', '    This '+tpTask.ResourceType+' is not associated with a user-story. -- ignored');
+                      return cb();
+                    }
 
-                  var userStoryId = isUserStory ? tpTask.Id : tpTask.UserStory.Id;
-                  
-                  var tpusdata;
-                  if (isUserStory) {
-                    utils.log('    Logging time on the user story...');
-                    tpusdata = {
-                        description: 'time spent on user story #' + userStoryId,
-                        spent: e.hours,
-                        date: new Date(e.created_at).toJSON()
-                    };
-                  } else {
-                    utils.log('    Logging bug time on the user story...');
-                    tpusdata = {
-                        description: 'time spent on bug #' + e.tp_task.id,
-                        spent: e.hours,
-                        date: new Date(e.created_at).toJSON()
-                    };
-                  }
+                    var userStoryId = isUserStory ? tpTask.Id : tpTask.UserStory.Id;
 
-                  tp.addTime(userStoryId, tpusdata)
-                  .then(function () {
-                      utils.log('    ' + tpdata.spent + 'h is logged on target process against user story #' + userStoryId);
-                      cb();
-                  }, function (err) {
-                      utils.log.err(err);
-                  });
-                }
+                    var tpusdata;
+                    if (isUserStory) {
+                      utils.log('    Logging time on the user story...');
+                      tpusdata = {
+                          description: 'time spent on user story #' + userStoryId,
+                          spent: e.hours,
+                          date: new Date(e.created_at).toJSON()
+                      };
+                    } else {
+                      utils.log('    Logging bug time on the user story...');
+                      tpusdata = {
+                          description: 'time spent on bug #' + e.tp_task.id,
+                          spent: e.hours,
+                          date: new Date(e.created_at).toJSON()
+                      };
+                    }
 
-                function logTime_task(cb) {
-                  tp.addTime(e.tp_task.id, tpdata)
-                  .then(function () {
-                      utils.log('    ' + tpdata.spent + 'h is logged on target process against '+ e.tp_task.type +' #' + e.tp_task.id);
-                      cb();
-                  }, function (err) {
-                      utils.log.err(err);
-                  });
-                }
-
-                // if not bug, time is always on task
-                if(isTask) {
-                  return logTime_task(done);
-                }
-                else if (isBug) {
-                  if(tp.bugTimeBehavior === 'bug') {
-                    return logTime_task(done);
-                  }
-                  else if(tp.bugTimeBehavior === 'user-story') {
-                    return logTime_us(done);
-                  }
-                  else {
-                    // both
-                    return logTime_task(function () {
-                      return logTime_us(done);
+                    tp.addTime(userStoryId, tpusdata)
+                    .then(function () {
+                        utils.log('    ' + tpdata.spent + 'h is logged on target process against user story #' + userStoryId);
+                        cb();
+                    }, function (err) {
+                        utils.log.err(err);
                     });
                   }
-                } else {
-                    return logTime_us(done);
-                }
+
+                  function logTime_task(cb) {
+                    tp.addTime(e.tp_task.id, tpdata)
+                    .then(function () {
+                        utils.log('    ' + tpdata.spent + 'h is logged on target process against '+ e.tp_task.type +' #' + e.tp_task.id);
+                        cb();
+                    }, function (err) {
+                        utils.log.err(err);
+                    });
+                  }
+
+                  // if not bug, time is always on task
+                  if(isTask) {
+                    return logTime_task(done);
+                  }
+                  else if (isBug) {
+                    if(value.items[0].issueCFRaw === 'Issue') {
+                      return logTime_task(done);
+                    }
+                    else if(value.items[0].issueCFRaw === 'User story') {
+                      return logTime_us(done);
+                    }
+                    else {
+                      // both
+                      return logTime_task(function () {
+                        return logTime_us(done);
+                      });
+                    }
+                  } else {
+                      return logTime_us(done);
+                  }
+              });
             });
+        });
         }, function (err) {
             utils.log.err('An error occured while fetching task from target process.' + err);
         });

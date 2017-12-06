@@ -7,6 +7,7 @@ var TargetProcess = (function() {
     this.subdomain = opts.domain;
     this.auth_string = btoa(opts.email + ':' + opts.password);
     this.full_url = "https://" + this.subdomain + ".tpondemand.com/api/v1";
+    this.full_url_cf = "https://" + this.subdomain + ".tpondemand.com/api/v2";
     this.ajax_defaults = {
       type: 'GET',
       headers: {
@@ -16,7 +17,7 @@ var TargetProcess = (function() {
       }
     };
 
-    this.bugTimeBehavior = opts['bug-time'];
+    this.bugTimeBehavior = this.getCustomField();
     this.allowLoggingTimeToUserStories = opts['story-time'] === 'true';
   }
 
@@ -67,24 +68,26 @@ var TargetProcess = (function() {
         done(null, v);
     }
 
-    var me = this;
-        me.getTask(id).catch(function (err) {
-          if (err.statusCode === 404) {
-            return me.getBug(id);
-          } else throw err;
-        }).catch(function (err) {
-          if (err.statusCode === 404) {
-            return me.getStory(id);
-          } else throw err;
-        }).then(function(result) {
-          if (result.ResourceType === 'UserStory' && !me.allowLoggingTimeToUserStories) {
-            done('Your config means that time cannot be logged directly onto user stories');
-          } else success(result);
-        }).catch(function (err) {
-          if (err.statusCode === 404) {
-            done('Story/Task/Bug with Id '+id+' could not be found or access is forbidden.');
-          } else failure(err);
-        });
+
+      var me = this;
+
+    me.getTask(id).catch(function (err) {
+      if (err.statusCode === 404) {
+        return me.getBug(id);
+      } else throw err;
+    }).catch(function (err) {
+      if (err.statusCode === 404) {
+        return me.getStory(id);
+      } else throw err;
+    }).then(function (result) {
+      if (result.ResourceType === 'UserStory' && !me.allowLoggingTimeToUserStories) {
+        done('Your config means that time cannot be logged directly onto user stories');
+      } else success(result);
+    }).catch(function (err) {
+      if (err.statusCode === 404) {
+        done('Story/Task/Bug with Id ' + id + ' could not be found or access is forbidden.');
+      } else failure(err);
+    });
   };
 
   TargetProcess.prototype.getStory = function(id, ajax_opts) {
@@ -101,6 +104,12 @@ var TargetProcess = (function() {
 
   TargetProcess.prototype.getBug = function(id, ajax_opts) {
     var url = this.full_url + '/Bugs/' + id;
+    ajax_opts = this.build_ajax_options(url, ajax_opts);
+    return request(ajax_opts);
+  };
+
+  TargetProcess.prototype.getCustomField = function(id, ajax_opts) {
+    var url = this.full_url_cf + '/Project/' + id + '?select={id, issueCFRaw:CustomValues["IssueTime to"]}';
     ajax_opts = this.build_ajax_options(url, ajax_opts);
     return request(ajax_opts);
   };
