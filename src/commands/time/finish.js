@@ -32,8 +32,8 @@ function controller(t) {
           getResource = tp.getBug(e.tp_task.id);
         } else if(isTask) {
           getResource = tp.getTask(e.tp_task.id);
-        } else if(isUserStory) {
-          getResource = tp.getStory(e.tp_user_story);
+        } else {
+          getResource = tp.getStory(e.tp_user_story.id);
         }
 
         getResource.then(function (result) {
