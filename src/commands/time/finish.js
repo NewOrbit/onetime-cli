@@ -36,7 +36,11 @@ function controller(t) {
           getResource = tp.getStory(e.tp_user_story.id);
         }
 
+        var tpResult;
+
         getResource.then(function (result) {
+          tpResult = result;
+
           if(isBug) {
             return tp.getIssueTimeTo(result.Project.Id).then(function (value) {
               return value.items[0].issueCFRaw;
@@ -53,7 +57,7 @@ function controller(t) {
             utils.log('    Bugs are configured to be logged against: ' + issueTimeToValue);
           }
 
-          base.captureTimeRemaining(e.hours, result, function (remain) {
+          base.captureTimeRemaining(e.hours, tpResult, function (remain) {
 
                 var tpdata = {
                     description: e.notes || '-',
@@ -64,13 +68,13 @@ function controller(t) {
 
                 function logTime_us(cb) {
                   // bugs may be without user-story
-                  var isUserStory = result.ResourceType === 'UserStory';
-                  if(!isUserStory && !result.UserStory) {
-                    utils.log.chalk('red', '    This '+result.ResourceType+' is not associated with a user-story. -- ignored');
+                  var isUserStory = tpResult.ResourceType === 'UserStory';
+                  if(!isUserStory && !tpResult.UserStory) {
+                    utils.log.chalk('red', '    This '+tpResult.ResourceType+' is not associated with a user-story. -- ignored');
                     return cb();
                   }
 
-                  var userStoryId = isUserStory ? result.Id : result.UserStory.Id;
+                  var userStoryId = isUserStory ? tpResult.Id : tpResult.UserStory.Id;
 
                   var tpusdata;
                   if (isUserStory) {

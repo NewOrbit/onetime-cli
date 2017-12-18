@@ -3,7 +3,6 @@ var utils = require('../../utils');
 var validation = require('../../utils/validation');
 var validator = require('validator');
 var harvest = require('../../api/harvest')();
-var inquirer = require('inquirer');
 var chalk = require('chalk');
 var mappings = require('../../data/map');
 var extend = require('extend');
