@@ -47,6 +47,7 @@ function controller(t) {
           }
 
           return {
+            tpResult: result
           };
         }).then(function (result) {
           // configured to not log bug-time at all
