@@ -40,14 +40,13 @@ function controller(t) {
           if(isBug) {
             return tp.getIssueTimeTo(result.Project.Id).then(function (value) {
               return {
-                tpResult: result
+                tpResult: result,
                 issueTimeToValue: value.items[0].issueCFRaw
               };
             });
           }
-          
+
           return {
-            tpResult: result 
           };
         }).then(function (result) {
           // configured to not log bug-time at all
