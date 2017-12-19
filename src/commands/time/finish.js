@@ -36,28 +36,31 @@ function controller(t) {
           getResource = tp.getStory(e.tp_user_story.id);
         }
 
-        var tpResult;
-
         getResource.then(function (result) {
-          tpResult = result;
-
           if(isBug) {
             return tp.getIssueTimeTo(result.Project.Id).then(function (value) {
-              return value.items[0].issueCFRaw;
+              return {
+                tpResult: result
+                issueTimeToValue: value.items[0].issueCFRaw
+              };
             });
           }
-        }).then(function (issueTimeToValue) {
+          
+          return {
+            tpResult: result 
+          };
+        }).then(function (result) {
           // configured to not log bug-time at all
-          if(isBug && issueTimeToValue === 'none') {
+          if(isBug && result.issueTimeToValue === 'none') {
             utils.log.chalk('red', '    System is configured NOT to log bug times AT ALL.');
             return done();
           }
 
           if (isBug) {
-            utils.log('    Bugs are configured to be logged against: ' + issueTimeToValue);
+            utils.log('    Bugs are configured to be logged against: ' + result.issueTimeToValue);
           }
 
-          base.captureTimeRemaining(e.hours, tpResult, function (remain) {
+          base.captureTimeRemaining(e.hours, result.tpResult, function (remain) {
 
                 var tpdata = {
                     description: e.notes || '-',
@@ -68,13 +71,13 @@ function controller(t) {
 
                 function logTime_us(cb) {
                   // bugs may be without user-story
-                  var isUserStory = tpResult.ResourceType === 'UserStory';
-                  if(!isUserStory && !tpResult.UserStory) {
-                    utils.log.chalk('red', '    This '+tpResult.ResourceType+' is not associated with a user-story. -- ignored');
+                  var isUserStory = result.tpResult.ResourceType === 'UserStory';
+                  if(!isUserStory && !result.tpResult.UserStory) {
+                    utils.log.chalk('red', '    This '+result.tpResult.ResourceType+' is not associated with a user-story. -- ignored');
                     return cb();
                   }
 
-                  var userStoryId = isUserStory ? tpResult.Id : tpResult.UserStory.Id;
+                  var userStoryId = isUserStory ? result.tpResult.Id : result.tpResult.UserStory.Id;
 
                   var tpusdata;
                   if (isUserStory) {
@@ -117,10 +120,10 @@ function controller(t) {
                   return logTime_task(done);
                 }
                 else if (isBug) {
-                  if(issueTimeToValue === 'Issue') {
+                  if(result.issueTimeToValue === 'Issue') {
                     return logTime_task(done);
                   }
-                  else if(issueTimeToValue === 'User story') {
+                  else if(result.issueTimeToValue === 'User story') {
                     return logTime_us(done);
                   }
                 } else {
