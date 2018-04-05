@@ -7,11 +7,7 @@ A command line interface to manage harvest and target-process in one place.
 
 ## Install
 
-You need to set up your MyGet authentication and then install the package.
-
-1. Run `npm login --registry=https://www.myget.org/F/neworbit/npm/ --scope=@neworbit` and follow the prompts (use your MyGet authentication)
-2. Run `npm config set @neworbit:always-auth true`
-3. Run `npm install -g @neworbit/onetime-cli`
+You need to [set up your MyGet authentication](https://github.com/NewOrbit/development-guidelines/blob/master/how-to/npm/associate-%40neworbit-packages-with-myget.md) and then install the package with `npm install -g @neworbit/onetime-cli`
 
 ## Usage
 
