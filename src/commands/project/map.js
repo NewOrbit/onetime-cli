@@ -6,7 +6,7 @@ function controllers(args) {
 
     function addController() {
         data.getHarvestProjects(function (err, hprojects) {
-            if(err) return utils.log(err);
+            if (err) return utils.log(err);
             data.getTPProjects(function (tpprojects) {
                 qq = [{
                     type: 'list',
@@ -37,27 +37,27 @@ function controllers(args) {
 
     function listController() {
         store.list(function (err, list) {
-            if(err) return utils.log.err(err);
+            if (err) return utils.log.err(err);
             var d = [];
-            for(var k in list) d.push({
+            for (var k in list) d.push({
                 'target process': list[k].tp.name,
                 harvest: list[k].harvest.name
             });
             utils.log();
-            if(d.length) console.table(d);
+            if (d.length) console.table(d);
             else utils.log('no mappings added yet');
         });
     }
 
     function removeController() {
         store.list(function (err, list) {
-            if(err) return utils.log.err(err);
+            if (err) return utils.log.err(err);
             var d = [];
-            for(var k in list) d.push({
+            for (var k in list) d.push({
                 value: k,
                 name: list[k].tp.name + ' --> ' + list[k].harvest.name
             });
-            if(d.length === 0) return utils.log('no mappings added yet');
+            if (d.length === 0) return utils.log('no mappings added yet');
             var q = {
                 type: 'list',
                 name: 'item',
@@ -66,7 +66,7 @@ function controllers(args) {
             };
             inquirer.prompt([q], function (res) {
                 store.remove(res.item, function (err) {
-                    if(err) return utils.log.err(err);
+                    if (err) return utils.log.err(err);
                     utils.log.succ('Mapping removed successfully.');
                 });
             });

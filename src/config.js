@@ -12,8 +12,8 @@ var store = new Configstore('onetime-cli');
 var appdata = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Application Support' : '/var/local');
 appdata += '/onetime-cli';
 
-if (!fs.existsSync(appdata)){
-    fs.mkdirSync(appdata);
+if (!fs.existsSync(appdata)) {
+  fs.mkdirSync(appdata);
 }
 
 var properties = {
@@ -34,45 +34,45 @@ var properties = {
 };
 
 module.exports = {
-    locals: locals,
-    appdata: appdata,
-    get: function (k) {
-        return store.get(k);
-    },
-    set: function (k, v) {
-        return store.set(k, v);
-    },
-    getKeyOptions: function (d, k) {
-      var props = properties[d];
-      if(!props) return;
+  locals: locals,
+  appdata: appdata,
+  get: function (k) {
+    return store.get(k);
+  },
+  set: function (k, v) {
+    return store.set(k, v);
+  },
+  getKeyOptions: function (d, k) {
+    var props = properties[d];
+    if (!props) return;
 
-      for (var i = 0; i < props.length; i++) {
-        var p = props[i];
-        if(p === k) return { key: k };
-        if(p.key === k ) return p;
+    for (var i = 0; i < props.length; i++) {
+      var p = props[i];
+      if (p === k) return { key: k };
+      if (p.key === k) return p;
+    }
+  },
+  readDomain: function (d, includeProtected) {
+    var res = {};
+
+    var props = properties[d];
+    for (var i = 0; i < props.length; i++) {
+      var p = props[i];
+      var k = typeof p === 'string' ? p : p.key;
+      var v = store.get(d + '_' + k);
+      v = typeof v === 'undefined' ? p.default : v;
+      if (p.protected && !includeProtected) {
+        v = '********';
       }
-    },
-    readDomain: function (d, includeProtected) {
-        var res = {};
 
-        var props = properties[d];
-        for (var i = 0; i < props.length; i++) {
-            var p = props[i];
-            var k = typeof p === 'string' ? p : p.key;
-            var v = store.get(d + '_' + k);
-            v = typeof v === 'undefined' ? p.default : v;
-            if(p.protected && !includeProtected) {
-              v = '********';
-            }
+      if (typeof v !== 'undefined') res[k] = v;
+      else return null;
+    }
 
-            if(typeof v !== 'undefined') res[k] = v;
-            else return null;
-        }
-
-        return res;
-    },
-    clear: function () {
-        store.clear();
-    },
-    isInitialized: store.get('_initialized')
+    return res;
+  },
+  clear: function () {
+    store.clear();
+  },
+  isInitialized: store.get('_initialized')
 };

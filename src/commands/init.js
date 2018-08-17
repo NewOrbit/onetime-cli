@@ -8,18 +8,18 @@ function controllers() {
         return [
             {
                 name: 'domain',
-                message: 'Your '+d+' domain (e.g. mycompany):',
+                message: 'Your ' + d + ' domain (e.g. mycompany):',
                 validate: validation.identifier(true)
             },
             {
                 name: 'email',
-                message: 'Your '+d+' email:',
+                message: 'Your ' + d + ' email:',
                 validate: validation.email(true)
             },
             {
                 type: 'password',
                 name: 'password',
-                message: 'Your '+d+' password:',
+                message: 'Your ' + d + ' password:',
                 validate: validation.required
             }
         ];
@@ -36,7 +36,7 @@ function controllers() {
     }
 
     return {
-        harvest: function() {
+        harvest: function () {
             prompt('Harvest', function (opts) {
                 store('harvest', opts);
                 config.set('_initialized', true);
@@ -44,7 +44,7 @@ function controllers() {
             });
         },
 
-        tp: function() {
+        tp: function () {
             prompt('Target Process', function (opts) {
                 store('tp', opts);
                 utils.log.succ('target process is configured successfully.');
@@ -59,7 +59,7 @@ cli.node('onetime.init')
     .help('initialize onetime');
 
 cli.node('onetime.init.harvest', controllers.rebind('harvest'))
-   .help('initialize harvest');
+    .help('initialize harvest');
 
 cli.node('onetime.init.tp', controllers.rebind('tp'))
-   .help('initialize target process');
+    .help('initialize target process');

@@ -20,7 +20,7 @@ function controller(t) {
     if (!d && offset) d = new Date().addDays(-offset);
     base.selectTime(d, null, function (selection) {
         base.captureHourAndConfirm(t, function (data) {
-            if(!data.confirm) return;
+            if (!data.confirm) return;
             restart(selection[0], data);
         });
     });
@@ -28,18 +28,18 @@ function controller(t) {
 }
 
 require('dastoor').builder
-.node('onetime.time.restart', {
-    terminal: true,
-    controller: controller
-})
-.help({
-    description: 'restart a timesheet',
-    options: [{
-        name: '-d, --date',
-        description: 'date of the timesheet. e.g. 2015-07-01'
-    },
-    {
-        name: '-o, --offset',
-        description: 'date offset relative to today. e.g. 1 for yesterday'
-    }]
-});
+    .node('onetime.time.restart', {
+        terminal: true,
+        controller: controller
+    })
+    .help({
+        description: 'restart a timesheet',
+        options: [{
+            name: '-d, --date',
+            description: 'date of the timesheet. e.g. 2015-07-01'
+        },
+        {
+            name: '-o, --offset',
+            description: 'date offset relative to today. e.g. 1 for yesterday'
+        }]
+    });

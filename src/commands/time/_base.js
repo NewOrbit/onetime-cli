@@ -9,26 +9,26 @@ var extend = require('extend');
 
 function captureNewTime(args, tpClient, done) {
     harvest.getProjects(function (err, projects) {
-        if(err) return utils.log.err(err);
+        if (err) return utils.log.err(err);
 
         var data = { projects: projects };
         var projects = data.projects.map(function (p) {
-            return { name: p.name, value: p.id};
+            return { name: p.name, value: p.id };
         });
 
         function promptTP(ready) {
-            if(!tpClient) return ready();
+            if (!tpClient) return ready();
 
             var tpEntity;
             function prepare(id, done) {
                 tpClient.getStoryOrTaskOrBug(id, function (err, e) {
-                    if(err) return done(err);
+                    if (err) return done(err);
                     tpEntity = e;
 
                     // set project from mappings
                     mappings.get(tpEntity.Project.Id, function (err, m) {
-                        if(err) return done(err);
-                        if(m) {
+                        if (err) return done(err);
+                        if (m) {
                             args.project = m.harvest.id;
                         }
                         done(true);
@@ -37,7 +37,7 @@ function captureNewTime(args, tpClient, done) {
             }
 
             function build() {
-                if(!tpEntity) return '';
+                if (!tpEntity) return '';
 
                 var task = { id: tpEntity.Id, name: tpEntity.Name, type: tpEntity.ResourceType.toLowerCase() };
                 var us = null;
@@ -65,9 +65,9 @@ function captureNewTime(args, tpClient, done) {
                 });
             }
 
-            if(validator.isInt(args.tp)){
+            if (validator.isInt(args.tp)) {
                 prepare(args.tp, function (res) {
-                    if(res === true) {
+                    if (res === true) {
                         var value = build();
                         utils.log.chalk('cyan', value);
                         ready(value);
@@ -95,7 +95,7 @@ function captureNewTime(args, tpClient, done) {
                         var p = data.projects.filter(function (p) {
                             return p.id === (ctx.project || args.project);
                         })[0];
-                        if(!p) {
+                        if (!p) {
                             utils.log.err('Project could not be found!');
                             return process.exit(1);
                         }
@@ -126,25 +126,25 @@ function captureNewTime(args, tpClient, done) {
 
 function createTpNote(task, us) {
     var parts = [''];
-    if(us) parts.push('> user_story #' + us.id + ' ' + us.name);
-    if(task) parts.push('> '+task.type+' #' + task.id + ' ' + task.name);
+    if (us) parts.push('> user_story #' + us.id + ' ' + us.name);
+    if (task) parts.push('> ' + task.type + ' #' + task.id + ' ' + task.name);
     return parts.join('\n');
 }
 
 function selectTime(date, filter, done, all, autoSelectSingle) {
     var opts = {};
-    if(date) opts.date = new Date(date);
+    if (date) opts.date = new Date(date);
     harvest.TimeTracking.daily(opts, function (err, d) {
-        if(err) return utils.log(err);
+        if (err) return utils.log(err);
 
         var entries = d.day_entries;
-        if(filter) entries = entries.filter(filter);
+        if (filter) entries = entries.filter(filter);
         var output = entries.map(function (i) {
             var us = i.tp_user_story;
             var task = i.tp_task;
 
             return {
-                hours:  i.hours.toFixed(2),
+                hours: i.hours.toFixed(2),
                 project: utils.summarize(i.project, 14),
                 type: utils.summarize(i.task, 14),
                 'user story': us ? utils.summarize(us.id + ': ' + us.name, 20) : '-',
@@ -161,17 +161,17 @@ function selectTime(date, filter, done, all, autoSelectSingle) {
             });
         }
 
-        if(choices.length === 0){
+        if (choices.length === 0) {
             utils.log();
             utils.log.chalk('gray', 'no timers could be found for: ' + chalk.cyan(d.for_day));
             utils.log();
             return;
         }
 
-        if(all){
+        if (all) {
             done(entries);
         }
-        else if(autoSelectSingle && entries.length === 1){
+        else if (autoSelectSingle && entries.length === 1) {
             utils.log.chalk('cyan', '❯ ' + output[0]);
             done(entries);
         }
@@ -206,10 +206,10 @@ function createTime(data) {
     }
 
     harvest.TimeTracking.create(opts, function (err, res) {
-        if(err) return utils.log.err(err);
-        if(data.s && opts.hours){
+        if (err) return utils.log.err(err);
+        if (data.s && opts.hours) {
             harvest.TimeTracking.toggleTimer({ id: res.id }, function (err) {
-                if(err) return utils.log.err(err);
+                if (err) return utils.log.err(err);
                 success();
             });
         }
@@ -220,18 +220,18 @@ function createTime(data) {
 function captureTimeRemaining(hours, task, done) {
 
     var projected = (task.TimeRemain > hours ?
-                    task.TimeRemain - hours : 0).toFixed(2);
+        task.TimeRemain - hours : 0).toFixed(2);
 
-    if(task.UserStory){
-      utils.log.chalk('green', '> User story: #', task.UserStory.Id, ':', task.UserStory.Name);
+    if (task.UserStory) {
+        utils.log.chalk('green', '> User story: #', task.UserStory.Id, ':', task.UserStory.Name);
     }
-    utils.log.chalk('green', '> '+task.ResourceType+': #' + task.Id, ':', task.Name);
+    utils.log.chalk('green', '> ' + task.ResourceType + ': #' + task.Id, ':', task.Name);
     utils.log.chalk('green', '> Projected remaining time:', projected);
 
     var q = {
         name: 'remaining',
         validate: validation.time(false),
-        message: 'How many hours is remaining from this '+task.ResourceType+'?' ,
+        message: 'How many hours is remaining from this ' + task.ResourceType + '?',
         filter: function (i) {
             var t = validation.convertTime(i);
             return t === 0 ? t : (t || projected);

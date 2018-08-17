@@ -10,43 +10,43 @@ function controller(args) {
     var validation = require('../../utils/validation');
 
     function start(args) {
-        if(args.p){
-          args.project = args.p;
-          delete args.p;
+        if (args.p) {
+            args.project = args.p;
+            delete args.p;
         }
 
         var offset = +(args.o || args.offset);
-        if(offset) {
-          delete args.o;
-          delete args.offset;
-          args.date = moment().add(-offset, 'day').toDate();
+        if (offset) {
+            delete args.o;
+            delete args.offset;
+            args.date = moment().add(-offset, 'day').toDate();
         }
 
         var d = args.d || args.date;
-        if(d) {
-          delete args.d;
-          delete args.date;
-          args.date = new Date(d);
+        if (d) {
+            delete args.d;
+            delete args.date;
+            args.date = new Date(d);
         }
 
-        if(args.date) {
-          utils.log.chalk('green', '> Date: ' + moment(args.date).format('DD MMMM YYYY'));
+        if (args.date) {
+            utils.log.chalk('green', '> Date: ' + moment(args.date).format('DD MMMM YYYY'));
         }
 
         base.captureNewTime(args, tpClient, function (result) {
             base.captureHourAndConfirm(args, function (r2) {
                 var notes = [args.notes, result.notes].compact().join('\n');
                 result = extend({}, args, result, r2, { notes: notes });
-                if(!result.confirm) return;
+                if (!result.confirm) return;
                 base.createTime(result);
             });
         });
     }
 
     var alias = args.a || args.alias;
-    if(alias){
+    if (alias) {
         aliasStore.get(alias, function (err, data) {
-            if(err) return utils.log.err(err);
+            if (err) return utils.log.err(err);
 
             extend(args, data);
             start(args);
@@ -58,26 +58,26 @@ function controller(args) {
 }
 
 require('dastoor').builder
-.node('onetime.time.start', {
-    terminal: true,
-    controller: controller
-})
-.help({
-    description: 'start a timesheet',
-    options: [
-      { name: '-d, --date', description: 'date of the timesheet. e.g. 2015-07-01' },
-      { name: '-o, --offset', description: 'date offset relative to today. e.g. 1 for yesterday' },
-      {
-        name: '-p, --project',
-        description: 'harvest project id'
-      },
-      {
-        name: '--tp',
-        description: 'target process task id'
-      },
-      {
-        name: '-a, --alias',
-        description: 'alias name to start the time with'
-      }
-    ]
-});
+    .node('onetime.time.start', {
+        terminal: true,
+        controller: controller
+    })
+    .help({
+        description: 'start a timesheet',
+        options: [
+            { name: '-d, --date', description: 'date of the timesheet. e.g. 2015-07-01' },
+            { name: '-o, --offset', description: 'date offset relative to today. e.g. 1 for yesterday' },
+            {
+                name: '-p, --project',
+                description: 'harvest project id'
+            },
+            {
+                name: '--tp',
+                description: 'target process task id'
+            },
+            {
+                name: '-a, --alias',
+                description: 'alias name to start the time with'
+            }
+        ]
+    });

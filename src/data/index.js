@@ -1,7 +1,7 @@
 function getHarvestProjects(done) {
     var harvest = require('../api/harvest')();
     harvest.TimeTracking.daily({}, function (err, d) {
-        if(err) return done(err);
+        if (err) return done(err);
         return done(null, d.projects.select(['id', 'name']));
     });
 

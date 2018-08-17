@@ -1,7 +1,6 @@
 var utils = require('./');
 
-Date.prototype.addDays = function(days)
-{
+Date.prototype.addDays = function (days) {
     var dat = new Date(this.valueOf());
     dat.setDate(dat.getDate() + days);
     return dat;
@@ -27,7 +26,7 @@ Array.prototype.sortByDesc = function (f) {
     });
 };
 
-Array.prototype.compact = function() {
+Array.prototype.compact = function () {
     return this.filter(function (i) {
         return !!i;
     });
@@ -35,18 +34,18 @@ Array.prototype.compact = function() {
 
 Array.prototype.tabularize = function () {
     var list = this.map(function (i) {
-        for(var p in i) i[p] = (i[p] || '').toString();
+        for (var p in i) i[p] = (i[p] || '').toString();
         return i;
     });
 
     var len = [];
     list.forEach(function (i) {
-        for(var p in i) len[p] = Math.max(len[p] || 0, i[p].length);
+        for (var p in i) len[p] = Math.max(len[p] || 0, i[p].length);
     });
 
     return list.map(function (i) {
         var res = [];
-        for(var p in i) res.push(utils.pad(i[p], len[p]));
+        for (var p in i) res.push(utils.pad(i[p], len[p]));
         return res.join('  ');
     });
 };
@@ -73,7 +72,7 @@ Function.prototype.rebind = function (n) {
     return function () {
         var res = me.apply();
         var f = res && res[n];
-        if(typeof f !== 'function') throw 'routed property was not a function.';
+        if (typeof f !== 'function') throw 'routed property was not a function.';
         f.apply(null, arguments);
     };
 };
