@@ -53,7 +53,7 @@ function controller(t) {
             // configured to not log bug-time at all
             if (isBug && result.issueTimeToValue === 'none') {
                 utils.log.chalk('red', '    System is configured NOT to log bug times AT ALL.');
-                return done();
+                return done(false);
             }
 
             if (isBug) {
@@ -74,7 +74,7 @@ function controller(t) {
                     var isUserStory = result.tpResult.ResourceType === 'UserStory';
                     if (!isUserStory && !result.tpResult.UserStory) {
                         utils.log.chalk('red', '    This ' + result.tpResult.ResourceType + ' is not associated with a user-story. -- ignored');
-                        return cb();
+                        return cb(false);
                     }
 
                     var userStoryId = isUserStory ? result.tpResult.Id : result.tpResult.UserStory.Id;
@@ -99,7 +99,7 @@ function controller(t) {
                     tp.addTime(userStoryId, tpusdata)
                         .then(function () {
                             utils.log('    ' + tpdata.spent + 'h is logged on target process against user story #' + userStoryId);
-                            cb();
+                            cb(true);
                         }, function (err) {
                             utils.log.err(err);
                         });
@@ -109,7 +109,7 @@ function controller(t) {
                     tp.addTime(e.tp_task.id, tpdata)
                         .then(function () {
                             utils.log('    ' + tpdata.spent + 'h is logged on target process against ' + e.tp_task.type + ' #' + e.tp_task.id);
-                            cb();
+                            cb(true);
                         }, function (err) {
                             utils.log.err(err);
                         });
@@ -140,12 +140,16 @@ function controller(t) {
         if (e.finished) return utils.log.err('This time is already marked as finished.');
 
         utils.log('❯ finishing time:', e.id);
-        pauseAndLog(e, function () {
+        pauseAndLog(e, function (finishEntry) {
             if (!e.tp_task && !e.tp_user_story) {
                 utils.log('    Time is not associated with a target-process task.');
                 return done();
             }
 
+            if (!finishEntry) {
+                return done();
+            }
+            
             utils.log('    Marking time as finished on harvest...');
             var model = {
                 id: e.id,
