@@ -2,7 +2,7 @@ var btoa = require('btoa');
 var extend = require('extend');
 var request = require('request-promise-json').request;
 
-var TargetProcess = (function() {
+var TargetProcess = (function () {
   function TargetProcess(opts) {
     this.subdomain = opts.domain;
     this.auth_string = btoa(opts.email + ':' + opts.password);
@@ -20,14 +20,14 @@ var TargetProcess = (function() {
     this.allowLoggingTimeToUserStories = opts['story-time'] === 'true';
   }
 
-  TargetProcess.prototype.build_ajax_options = function(uri, opts) {
+  TargetProcess.prototype.build_ajax_options = function (uri, opts) {
     if (!opts) {
       opts = {};
     }
     return extend({ url: uri }, this.ajax_defaults, opts);
   };
 
-  TargetProcess.prototype.getProjects = function(ajax_opts) {
+  TargetProcess.prototype.getProjects = function (ajax_opts) {
     var projects_url;
     if (!ajax_opts) {
       ajax_opts = {};
@@ -37,7 +37,7 @@ var TargetProcess = (function() {
     return request(ajax_opts);
   };
 
-  TargetProcess.prototype.getStories = function(projectId, ajax_opts) {
+  TargetProcess.prototype.getStories = function (projectId, ajax_opts) {
     var stories_url;
     if (!ajax_opts) {
       ajax_opts = {};
@@ -47,7 +47,7 @@ var TargetProcess = (function() {
     return request(ajax_opts);
   };
 
-  TargetProcess.prototype.getTasks = function(storyId, ajax_opts) {
+  TargetProcess.prototype.getTasks = function (storyId, ajax_opts) {
     var tasks_url;
     if (!ajax_opts) {
       ajax_opts = {};
@@ -59,16 +59,16 @@ var TargetProcess = (function() {
 
   TargetProcess.prototype.getStoryOrTaskOrBug = function (id, done) {
     function failure(err) {
-        done((err && err.response && err.response.Message) ||
+      done((err && err.response && err.response.Message) ||
         'An error occured while fetching task from target process.');
     }
 
     function success(v) {
-        done(null, v);
+      done(null, v);
     }
 
 
-      var me = this;
+    var me = this;
 
     me.getTask(id).catch(function (err) {
       if (err.statusCode === 404) {
@@ -89,31 +89,31 @@ var TargetProcess = (function() {
     });
   };
 
-  TargetProcess.prototype.getStory = function(id, ajax_opts) {
+  TargetProcess.prototype.getStory = function (id, ajax_opts) {
     var url = this.full_url + '/Userstories/' + id;
     ajax_opts = this.build_ajax_options(url, ajax_opts);
     return request(ajax_opts);
   }
 
-  TargetProcess.prototype.getTask = function(id, ajax_opts) {
+  TargetProcess.prototype.getTask = function (id, ajax_opts) {
     var url = this.full_url + '/Tasks/' + id;
     ajax_opts = this.build_ajax_options(url, ajax_opts);
     return request(ajax_opts);
   };
 
-  TargetProcess.prototype.getBug = function(id, ajax_opts) {
+  TargetProcess.prototype.getBug = function (id, ajax_opts) {
     var url = this.full_url + '/Bugs/' + id;
     ajax_opts = this.build_ajax_options(url, ajax_opts);
     return request(ajax_opts);
   };
 
-  TargetProcess.prototype.getIssueTimeTo = function(id, ajax_opts) {
+  TargetProcess.prototype.getIssueTimeTo = function (id, ajax_opts) {
     var url = this.full_url_cf + '/Project/' + id + '?select={id, issueCFRaw:CustomValues["IssueTime to"]}';
     ajax_opts = this.build_ajax_options(url, ajax_opts);
     return request(ajax_opts);
   };
 
-  TargetProcess.prototype.addTime = function(taskId, opts, ajax_opts) {
+  TargetProcess.prototype.addTime = function (taskId, opts, ajax_opts) {
     var time_entry, time_struct, time_url;
     if (!ajax_opts) {
       ajax_opts = {};
@@ -145,7 +145,7 @@ var TargetProcess = (function() {
 })();
 
 module.exports = function () {
-    var config = require('../config');
-    var settings = config.readDomain('tp', true);
-    return settings ? new TargetProcess(settings) : null;
+  var config = require('../config');
+  var settings = config.readDomain('tp', true);
+  return settings ? new TargetProcess(settings) : null;
 };

@@ -5,7 +5,7 @@ function controller(args) {
     var store = require('./_store');
 
     store.list(function (err, data) {
-        if(err) return utils.log.err(err);
+        if (err) return utils.log.err(err);
 
         utils.log();
         for (var n in data) {
@@ -16,8 +16,8 @@ function controller(args) {
 }
 
 require('dastoor').builder
-.node('onetime.time.alias.list', {
-    terminal: true,
-    controller: controller,
-    help: 'list aliases'
-});
+    .node('onetime.time.alias.list', {
+        terminal: true,
+        controller: controller,
+        help: 'list aliases'
+    });

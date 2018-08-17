@@ -18,12 +18,12 @@ function controller(args) {
         name = name || data.name;
 
         store.exists(name, function (err, e) {
-            if(err) return utils.log.err(err);
-            if(e) return utils.log.err('Alias `'+name+'` already exists.');
+            if (err) return utils.log.err(err);
+            if (e) return utils.log.err('Alias `' + name + '` already exists.');
 
             base.captureNewTime(args, tpClient, function (res) {
                 store.add(name, res, function (err) {
-                    if(err) return utils.log.err(err);
+                    if (err) return utils.log.err(err);
                     utils.log.succ('Your new alias is created successfully');
                 });
             });
@@ -32,8 +32,8 @@ function controller(args) {
 }
 
 require('dastoor').builder
-.node('onetime.time.alias.add', {
-    terminal: true,
-    controller: controller,
-    help: 'add an alias'
-});
+    .node('onetime.time.alias.add', {
+        terminal: true,
+        controller: controller,
+        help: 'add an alias'
+    });

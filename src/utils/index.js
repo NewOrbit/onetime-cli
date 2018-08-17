@@ -1,14 +1,14 @@
 var chalk = require('chalk');
 
 function summarize(v, l) {
-    if(!v) return v;
-    if(v.length <= l) return v;
+    if (!v) return v;
+    if (v.length <= l) return v;
     return v.substring(0, l - 2) + '..';
 }
 
 function pad(v, l) {
     v = v || '';
-    while(v.length < l) v += ' ';
+    while (v.length < l) v += ' ';
     return v;
 }
 

@@ -16,7 +16,7 @@ function controllers() {
             message: 'Are you sure you want to clear onetime config?'
         };
         inquirer.prompt(q, function (d) {
-            if(!d.sure) return;
+            if (!d.sure) return;
 
             config.clear();
         });
@@ -25,11 +25,11 @@ function controllers() {
     function show() {
         function showDomain(name, key) {
             var settings = config.readDomain(key);
-            if(!settings) return;
+            if (!settings) return;
 
             utils.log();
             utils.log('    ' + name);
-            for(var p in settings){
+            for (var p in settings) {
                 utils.log('      ' + utils.pad(p, 16) + settings[p]);
             }
             utils.log();

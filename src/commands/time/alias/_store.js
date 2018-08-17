@@ -6,7 +6,7 @@ var fs = require('fs');
 var filename = config.appdata + '/alias.json';
 
 function _read(done) {
-    fs.exists(filename, function(exists) {
+    fs.exists(filename, function (exists) {
         if (!exists) {
             done(null, {});
         }
@@ -22,7 +22,7 @@ function _write(data, done) {
 
 function _change(action, done) {
     _read(function (err, data) {
-        if(err) return done(err);
+        if (err) return done(err);
 
         action(data);
         _write(data, done);
@@ -35,11 +35,11 @@ function list(done) {
 
 function get(name, done) {
     _read(function (err, data) {
-        if(err) return done(err);
+        if (err) return done(err);
 
         var a = data[name];
-        if(!a) {
-            return done('Alias `'+name+'` doesnot exist.');
+        if (!a) {
+            return done('Alias `' + name + '` doesnot exist.');
         }
 
         done(null, a);
@@ -48,7 +48,7 @@ function get(name, done) {
 
 function exists(name, done) {
     _read(function (err, data) {
-        if(err) return done(err);
+        if (err) return done(err);
 
         var a = data[name];
         done(null, !!a);

@@ -10,10 +10,10 @@ function clearController() {
 var cli = require('dastoor').builder;
 
 cli.node('onetime.cache', {
-    help: 'manage onetime cache'
+  help: 'manage onetime cache'
 });
 
 cli.node('onetime.cache.clear', {
-    help: 'clears onetime cached data',
-    controller: clearController
+  help: 'clears onetime cached data',
+  controller: clearController
 });

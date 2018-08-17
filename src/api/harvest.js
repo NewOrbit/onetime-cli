@@ -21,7 +21,7 @@ module.exports = function () {
     result.prefixes = prefixes;
 
     function extractId(l, prefix) {
-        if(l.indexOf(prefix) === 0) {
+        if (l.indexOf(prefix) === 0) {
             var p = l.substring(prefix.length).split(' ');
             var id = +p[0];
             var rest = p.slice(1).join(' ');
@@ -32,9 +32,9 @@ module.exports = function () {
     function processResult(client, cb) {
         return function () {
             Array.prototype.slice.call(arguments).forEach(function (arg) {
-                if(!!arg && !!arg.day_entries) {
+                if (!!arg && !!arg.day_entries) {
                     arg.day_entries.forEach(function (e) {
-                        if(!e.notes) return;
+                        if (!e.notes) return;
 
                         var parts = [];
                         var tp_user_story_id, tp_task_id;
@@ -45,10 +45,10 @@ module.exports = function () {
                             var bug = extractId(l, prefixes.bugPrefix);
                             var finished = l.trim() === prefixes.finishedPrefix;
 
-                            if(us) e.tp_user_story = us;
-                            else if(task) { e.tp_task = task; e.tp_task.type = 'task'; }
-                            else if(bug) { e.tp_task = bug; e.tp_task.type = 'bug'; }
-                            else if(finished) e.finished = true;
+                            if (us) e.tp_user_story = us;
+                            else if (task) { e.tp_task = task; e.tp_task.type = 'task'; }
+                            else if (bug) { e.tp_task = bug; e.tp_task.type = 'bug'; }
+                            else if (finished) e.finished = true;
                             else parts.push(l);
                         });
 
@@ -72,10 +72,10 @@ module.exports = function () {
     });
 
     result.getProjects = cache.apply(function (cb) {
-      result.TimeTracking.daily({}, function (err, res) {
-        if(err) return cb(err);
-        return cb(null, res.projects);
-      });
+        result.TimeTracking.daily({}, function (err, res) {
+            if (err) return cb(err);
+            return cb(null, res.projects);
+        });
     }, 'harvest_TimeTracking_getProjects');
 
     return result;

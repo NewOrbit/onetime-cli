@@ -50,7 +50,7 @@ describe('method: convertTime()', function () {
     var m = validator.convertTime;
 
     function row(input, expected) {
-        it('should return `'+expected+'` for `' + input + '`', function () {
+        it('should return `' + expected + '` for `' + input + '`', function () {
             expect(m(input)).to.equal(expected);
         });
     }

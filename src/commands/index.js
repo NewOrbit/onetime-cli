@@ -27,7 +27,7 @@ var onetime = cli.node('onetime', {
         }]
     },
     controller: function (args) {
-        if(args.v || args.version){
+        if (args.v || args.version) {
             utils.log();
             utils.log.chalk('green', '>   ' + info.version);
             utils.log();

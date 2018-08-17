@@ -5,7 +5,7 @@ function listController(t) {
     var data = require('../../data');
 
     data.getHarvestProjects(function (err, projects) {
-        if(err) return utils.log(err);
+        if (err) return utils.log(err);
 
         var projection = projects;
         console.table(projection);
