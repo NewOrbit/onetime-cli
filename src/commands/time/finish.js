@@ -52,8 +52,7 @@ function controller(t) {
         }).then(function (result) {
             // configured to not log bug-time at all
             if (isBug && result.issueTimeToValue === 'none') {
-                utils.log.chalk('red', '    System is configured NOT to log bug times AT ALL.');
-                return done();
+                return done('System is configured NOT to log bug times AT ALL.');
             }
 
             if (isBug) {
@@ -73,8 +72,7 @@ function controller(t) {
                     // bugs may be without user-story
                     var isUserStory = result.tpResult.ResourceType === 'UserStory';
                     if (!isUserStory && !result.tpResult.UserStory) {
-                        utils.log.chalk('red', '    This ' + result.tpResult.ResourceType + ' is not associated with a user-story. -- ignored');
-                        return cb();
+                        return cb('This ' + result.tpResult.ResourceType + ' is not associated with a user-story. -- ignored');
                     }
 
                     var userStoryId = isUserStory ? result.tpResult.Id : result.tpResult.UserStory.Id;
@@ -140,9 +138,14 @@ function controller(t) {
         if (e.finished) return utils.log.err('This time is already marked as finished.');
 
         utils.log('❯ finishing time:', e.id);
-        pauseAndLog(e, function () {
+        pauseAndLog(e, function (err) {
             if (!e.tp_task && !e.tp_user_story) {
                 utils.log('    Time is not associated with a target-process task.');
+                return done();
+            }
+
+            if (err) {
+                utils.log.chalk('red', '    ' + err);
                 return done();
             }
 
