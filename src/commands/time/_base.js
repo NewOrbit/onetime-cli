@@ -5,7 +5,6 @@ var validator = require('validator');
 var harvest = require('../../api/harvest')();
 var chalk = require('chalk');
 var mappings = require('../../data/map');
-var extend = require('extend');
 
 function captureNewTime(args, tpClient, done) {
     harvest.getProjects(function (err, projects) {
@@ -51,29 +50,37 @@ function captureNewTime(args, tpClient, done) {
 
             var tpq = {
                 name: 'tp',
-                validate: validation.number(false, function (i) {
-                    var done = this.async();
-                    prepare(i, done);
-                }),
+                validate: validation.number(false),
                 message: 'Any target process story/task/bug? (id without #)',
-                filter: build
             };
+
+            function handleInput(tp) {
+              prepare(tp, function (res) {
+                if (res === true) {
+                    var value = build();
+                    utils.log.chalk('cyan', value);
+                    ready(value);
+                }
+                else {
+                  utils.log.err(res);
+                  ask();
+                }
+              });
+            }
 
             function ask() {
                 inquirer.prompt(tpq, function (d) {
-                    ready(d.tp);
+                  if (d.tp) {
+                    handleInput(d.tp);
+                  }
+                  else {
+                    ready();
+                  }
                 });
             }
 
             if (validator.isInt(args.tp)) {
-                prepare(args.tp, function (res) {
-                    if (res === true) {
-                        var value = build();
-                        utils.log.chalk('cyan', value);
-                        ready(value);
-                    }
-                    else ask();
-                });
+                handleInput(args.tp);
             }
             else ask();
         }
